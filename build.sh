@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Instalar paquetes sin frozen-lockfile
-echo "Instalando dependencias con pnpm sin usar frozen-lockfile..."
-pnpm install --no-frozen-lockfile
+# Instalar paquetes con npm en lugar de pnpm
+echo "Instalando dependencias con npm..."
+npm install
 
 # Construir el proyecto
 echo "Construyendo el proyecto..."
-pnpm run build
+npm run build
 
 # Mensaje de finalización
 echo "¡Compilación completada con éxito!"
