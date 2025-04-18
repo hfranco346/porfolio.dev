@@ -26,11 +26,11 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    
+
     <!-- Primary Meta Tags -->
     <meta name="title" content={title} />
     <meta name="image" content={socialImageURL} />
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
@@ -43,7 +43,7 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <meta property="og:image:height" content="800" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:site_name" content={title} />
-    
+
     <!-- Fallbacks that some apps use -->
     <link rel="image_src" href={socialImageURL} />
     <meta name="thumbnail" content={socialImageURL} />
@@ -55,7 +55,7 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
-    
+
     <!-- WhatsApp specific -->
     <meta name="theme-color" content="#ffffff" />
 
