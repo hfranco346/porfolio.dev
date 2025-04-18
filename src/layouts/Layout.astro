@@ -13,7 +13,8 @@ interface Props {
 
 const { description, title, image = "/profile_picture.jpeg" } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const socialImageURL = new URL(image, Astro.site);
+// Ensure the image URL is absolute with the full domain
+const socialImageURL = new URL(image, Astro.site).toString();
 ---
 
 <!doctype html>
@@ -33,9 +34,13 @@ const socialImageURL = new URL(image, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:image:alt" content={description} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="800" />
     <meta property="og:site_name" content={title} />
+
+    <!-- Force image to be used as preview for WhatsApp -->
+    <meta property="og:image:type" content="image/jpeg" />
+    <link rel="image_src" href={socialImageURL} />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
@@ -44,7 +49,7 @@ const socialImageURL = new URL(image, Astro.site);
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
 
-    <!-- WhatsApp specific (though it uses Open Graph) -->
+    <!-- WhatsApp specific -->
     <meta name="theme-color" content="#ffffff" />
 
     <ViewTransitions />
