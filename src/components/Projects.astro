@@ -7,6 +7,7 @@ import Flutter from "./icons/Flutter.astro";
 import Angular from "./icons/Angular.astro";
 import Supabase from "./icons/Supabase.astro";
 import NodeJS from "./icons/Node.astro";
+import Apple from "./icons/apple.astro";
 
 const TAGS = {
   FLUTTER: {
@@ -34,6 +35,11 @@ const TAGS = {
     class: "bg-[#003159] text-white",
     icon: Nest,
   },
+  APPLE: {
+    name: "iCloud Sync",
+    class: "bg-[#003159] text-white",
+    icon: Apple,
+  },
 };
 const PROJECTS = [
   {
@@ -49,9 +55,18 @@ const PROJECTS = [
       "AI PR Reviewer - A developer tool to review pull requests with AI, based on prompt engineering",
     description:
       "A developer tool to review pull requests with AI, based on prompt engineering",
-    link: "https://mealmixer.xyz",
+
     image: "/projects/aiprreviewer.png",
     tags: [TAGS.FLUTTER, TAGS.SUPABASE],
+  },
+  {
+    title: "ToDoodle - Handwritten style todo app",
+    description:
+      "A mobile APP to manage your tasks with a handwritten style. Built with Flutter, In App Purchases, and iCloud Sync.",
+
+    image: "/projects/todoodle.png",
+    link: "https://apps.apple.com/hn/app/to-do-handwriting-style/id6747467870?l=en-GB",
+    tags: [TAGS.FLUTTER, TAGS.APPLE],
   },
 ];
 ---
@@ -63,7 +78,7 @@ const PROJECTS = [
         <div class="w-full md:w-1/2">
           <div class="relative flex flex-col items-center col-span-6 row-span-5 gap-8 transition duration-500 ease-in-out transform shadow-xl overflow-clip rounded-xl sm:rounded-xl md:group-hover:-translate-y-1 md:group-hover:shadow-2xl lg:border lg:border-gray-800 lg:hover:border-gray-700 lg:hover:bg-gray-800/50">
             <img
-              alt="Recién llegado vs 5 años en Nueva Zelanda"
+              alt="Project Image"
               class="object-cover object-top w-full h-56 transition duration-500 sm:h-full md:scale-110 md:group-hover:scale-105"
               loading="lazy"
               src={image}
