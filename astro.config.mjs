@@ -10,7 +10,9 @@ export default defineConfig({
   // canonical, og:url, og:image, hreflang y robots.txt. Antes apuntaba a
   // 'https://porfolio.dev/' (el template original de midudev), lo que rompia
   // los previews al compartir y le cedia el canonical a un dominio ajeno.
-  site: 'https://porfolio-dev2.onrender.com/',
+  // Va el dominio publico por el que entran los visitantes, NO la URL interna
+  // de Render: si difieren, el canonical parte el SEO entre dos hostnames.
+  site: 'https://henderdev.net/',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
