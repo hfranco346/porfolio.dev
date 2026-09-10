@@ -1,4 +1,5 @@
 ---
+import { Image, getImage } from "astro:assets";
 import Link from "./icons/Link.astro";
 import LinkButton from "./LinkButton.astro";
 import Nest from "./icons/Nest.astro";
@@ -10,6 +11,17 @@ import Apple from "./icons/apple.astro";
 import Swift from "./icons/Swift.astro";
 import Gemma from "./icons/Gemma.astro";
 import { content, type ProjectId } from "@/i18n/content";
+
+// Importadas desde src/ (no public/) para que Astro las procese: convierte a
+// WebP, genera un srcset con los anchos que realmente se muestran y calcula
+// width/height. Los archivos en public/ se sirven tal cual, sin optimizar.
+import mealmixerImage from "@/assets/projects/mealmixer.png";
+import aiPrReviewerImage from "@/assets/projects/aiprreviewer.png";
+import todoodleImage from "@/assets/projects/todoodle.png";
+import nearGpsImage from "@/assets/projects/near-gps.png";
+import nearVgpsImage from "@/assets/projects/near-vgps.png";
+import youfibreImage from "@/assets/projects/youfibre.png";
+import typeItImage from "@/assets/projects/type-it.png";
 import { getLangFromUrl, useTranslations } from "@/i18n/utils";
 
 const lang = getLangFromUrl(Astro.url);
@@ -63,36 +75,36 @@ const TAGS = {
 // desde el diccionario, para que no haya que duplicar imagen, link ni tags.
 const PROJECTS: {
   id: ProjectId;
-  image: string;
+  image: ImageMetadata;
   link?: string;
   tags: (typeof TAGS)[keyof typeof TAGS][];
 }[] = [
   {
     id: "mealmixer",
-    image: "/projects/mealmixer.png",
+    image: mealmixerImage,
     link: "https://mealmixer-landing-astro.onrender.com/en/",
     tags: [TAGS.FLUTTER, TAGS.NODE, TAGS.NEST, TAGS.SUPABASE],
   },
   {
     id: "aiPrReviewer",
-    image: "/projects/aiprreviewer.png",
+    image: aiPrReviewerImage,
     tags: [TAGS.FLUTTER, TAGS.SUPABASE],
   },
   {
     id: "todoodle",
-    image: "/projects/todoodle.png",
+    image: todoodleImage,
     link: "https://apps.apple.com/hn/app/to-do-handwriting-style/id6747467870?l=en-GB",
     tags: [TAGS.FLUTTER, TAGS.APPLE],
   },
   {
     id: "nearGps",
-    image: "/projects/near-gps.png",
+    image: nearGpsImage,
     link: "https://apps.apple.com/hn/app/near-gps/id6757407409?l=en-GB",
     tags: [TAGS.FLUTTER],
   },
   {
     id: "nearVgps",
-    image: "/projects/near-vgps.png",
+    image: nearVgpsImage,
     link: "https://apps.apple.com/hn/app/near-vgps/id6760239357?l=en-GB",
     tags: [TAGS.FLUTTER],
   },
@@ -100,16 +112,25 @@ const PROJECTS: {
     // Sin `link` a proposito: la ficha del App Store no se enlaza desde el
     // portfolio. Sin link, el boton de preview no se renderiza.
     id: "youfibre",
-    image: "/projects/youfibre.png",
+    image: youfibreImage,
     tags: [TAGS.FLUTTER],
   },
   {
     id: "typeIt",
-    image: "/projects/type-it.png",
+    image: typeItImage,
     link: "https://www.type-it.net/",
     tags: [TAGS.FLUTTER, TAGS.SWIFT, TAGS.GEMMA],
   },
 ];
+
+// Version grande y en WebP para el modal. Se genera en build y solo se
+// descarga cuando el visitante abre el lightbox, no al cargar la pagina.
+const lightboxSources: Record<string, string> = {};
+for (const { id, image } of PROJECTS) {
+  lightboxSources[id] = (
+    await getImage({ src: image, width: 1600, format: "webp", quality: 80 })
+  ).src;
+}
 ---
 
 <div class="flex flex-col gap-y-16">
@@ -118,11 +139,16 @@ const PROJECTS: {
       <article class="flex flex-col space-x-0 space-y-8 group md:flex-row md:space-x-8 md:space-y-0">
         <div class="w-full md:w-1/2">
           <div class="relative flex flex-col items-center col-span-6 row-span-5 gap-8 transition duration-500 ease-in-out transform shadow-xl overflow-clip rounded-xl sm:rounded-xl md:group-hover:-translate-y-1 md:group-hover:shadow-2xl lg:border lg:border-gray-800 lg:hover:border-gray-700 lg:hover:bg-gray-800/50">
-            <img
-              alt={texts[id].title}
-              class="object-cover object-top w-full h-56 transition duration-500 sm:h-full md:scale-110 md:group-hover:scale-105"
-              loading="lazy"
+            <Image
               src={image}
+              alt={texts[id].title}
+              widths={[480, 900, 1300]}
+              sizes="(min-width: 768px) 440px, 100vw"
+              format="webp"
+              quality={80}
+              loading="lazy"
+              decoding="async"
+              class="object-cover object-top w-full h-56 transition duration-500 sm:h-full md:scale-110 md:group-hover:scale-105"
             />
             {/*
               Boton superpuesto en vez de envolver la <img>: no altera el
@@ -132,7 +158,7 @@ const PROJECTS: {
             */}
             <button
               type="button"
-              data-lightbox-src={image}
+              data-lightbox-src={lightboxSources[id]}
               data-lightbox-alt={texts[id].title}
               aria-label={`${t("lightbox.viewLarger")}: ${texts[id].title}`}
               class="absolute inset-0 w-full h-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-yellow-500"
