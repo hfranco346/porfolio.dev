@@ -1,0 +1,119 @@
+---
+import LanguagesIcon from "./icons/Languages.astro";
+import { languages, type Lang } from "@/i18n/ui";
+import {
+  getLangFromUrl,
+  getLocaleSwitchPath,
+  useTranslations,
+} from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const options = (Object.keys(languages) as Lang[]).map((code) => ({
+  code,
+  label: languages[code],
+  href: getLocaleSwitchPath(Astro.url, code),
+}));
+---
+
+<!--
+  Sin `transition:persist`: el marcador de idioma activo depende de la pagina,
+  y persistir el DOM lo dejaria desactualizado tras navegar.
+-->
+<div class="relative ml-1 mr-1">
+  <button
+    id="lang-toggle-btn"
+    class="flex transition border-none appearance-none hover:scale-125"
+    aria-label={t("lang.label")}
+    aria-haspopup="true"
+  >
+    <span class="sr-only">{t("lang.label")}</span>
+    <LanguagesIcon class="size-5" />
+  </button>
+  <div
+    id="langs-menu"
+    class="absolute hidden scale-80 top-8 right-0 text-sm p-1 min-w-[8rem] rounded-md border border-gray-100 bg-white/90 dark:bg-gray-900/90 dark:border-gray-500/20 shadow-[0_3px_10px_rgb(0,0,0,0.2)] backdrop-blur-md"
+  >
+    <ul>
+      {
+        options.map((option) => (
+          <li>
+            <a
+              class:list={[
+                "langs-menu-option block px-2 py-1.5 rounded-sm hover:bg-neutral-400/40 dark:hover:bg-gray-500/50",
+                { "text-blue-500": option.code === lang },
+              ]}
+              data-lang={option.code}
+              href={option.href}
+              hreflang={option.code}
+              aria-current={option.code === lang ? "true" : undefined}
+            >
+              {option.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<style>
+  #langs-menu.open {
+    display: inline;
+    animation: scale-up-center 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  @keyframes scale-up-center {
+    from {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+</style>
+
+<script is:inline>
+  // Delegacion sobre `document`, que ViewTransitions NO reemplaza: se registra
+  // una sola vez y siempre consulta el DOM vigente, sin acumular listeners ni
+  // quedarse con referencias muertas tras cada navegacion.
+  (function () {
+    if (window.__langToggleBound) return;
+    window.__langToggleBound = true;
+
+    document.addEventListener("click", function (event) {
+      var menu = document.getElementById("langs-menu");
+      if (!menu) return;
+
+      var target = event.target instanceof Element ? event.target : null;
+      if (!target) {
+        menu.classList.remove("open");
+        return;
+      }
+
+      if (target.closest("#lang-toggle-btn")) {
+        event.stopPropagation();
+        menu.classList.toggle("open");
+        return;
+      }
+
+      var option = target.closest(".langs-menu-option");
+      if (option) {
+        // Elegir idioma es una decision explicita: se persiste para que la
+        // autodeteccion no la pise en visitas posteriores.
+        try {
+          localStorage.setItem("preferred-lang", option.dataset.lang);
+        } catch (error) {
+          /* modo privado o storage bloqueado: navegamos igual */
+        }
+        return;
+      }
+
+      menu.classList.remove("open");
+    });
+  })();
+</script>

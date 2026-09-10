@@ -1,28 +1,17 @@
 ---
 import ExperienceItem from "./ExperienceItem.astro";
-const EXPERIENCE = [
-  {
-    date: "2022 - 2025 Oct",
-    title: "Mobile engineer at BairesDev",
-    company: "BairesDev",
-    description:
-      "I developed a mobile applications at BairesDev using Flutter. Leading development of a client-facing app for a UK-based company, focused on delivering intuitive user experiences with responsive design and seamless functionality.",
-  },
-  {
-    date: "2018 - 2022",
-    title: "Tech Lead",
-    company: "TiviTrace Honduras",
-    description:
-      "Led a team of five engineers in developing a cross-platform mobile app for TiviTrace using Flutter and Dart, delivering a user-friendly solution for real-time vehicle tracking. Additionally, developed a standalone FaceID recognition app used in the field to verify worker attendance and GPS location, ensuring presence at the correct site. Also contributed to the main web platform built with Angular 12.",
-  },
-];
+import { content } from "@/i18n/content";
+import { getLangFromUrl } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const experience = content[lang].experience;
 ---
 
 <ol class="relative mt-16">
   {
-    EXPERIENCE.map((experience) => (
+    experience.map((entry) => (
       <li class="">
-        <ExperienceItem {...experience} />
+        <ExperienceItem {...entry} />
       </li>
     ))
   }

@@ -4,21 +4,46 @@ import "@fontsource-variable/onest";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { ViewTransitions } from "astro:transitions";
+import ImageLightbox from "@/components/ImageLightbox.astro";
+import { defaultLang, languages, type Lang } from "@/i18n/ui";
+import {
+  getLangFromUrl,
+  localizePath,
+  stripLangFromPath,
+  useTranslations,
+} from "@/i18n/utils";
 
 interface Props {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   image?: string;
 }
 
-const { description, title, image = "/profile_picture.jpeg" } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const {
+  description = t("meta.description"),
+  title = t("meta.title"),
+  image = "/profile_picture.jpeg",
+} = Astro.props;
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Ensure the image URL is absolute with the full domain
 const socialImageURL = new URL(image, Astro.site).toString();
+
+// Versiones alternativas de ESTA misma página, para que Google entienda que
+// son el mismo contenido en distintos idiomas y no las trate como duplicados.
+const basePath = stripLangFromPath(Astro.url.pathname);
+const alternates = (Object.keys(languages) as Lang[]).map((code) => ({
+  code,
+  href: new URL(localizePath(basePath, code), Astro.site).toString(),
+}));
+const defaultAlternate = alternates.find(({ code }) => code === defaultLang)!;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
@@ -26,6 +51,68 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    <!-- Idiomas alternativos -->
+    <link rel="canonical" href={canonicalURL} />
+    {
+      alternates.map(({ code, href }) => (
+        <link rel="alternate" hreflang={code} href={href} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={defaultAlternate.href} />
+
+    <!--
+      Autodetección de idioma. Corre inline y antes del paint para evitar que
+      se vea el idioma equivocado. Sólo actúa en rutas que existen en ambos
+      idiomas y nunca pisa una elección explícita del usuario.
+    -->
+    <script is:inline>
+      (function () {
+        var SUPPORTED = ["en", "es"];
+        var DEFAULT = "en";
+        var STORAGE_KEY = "preferred-lang";
+        var LOCALIZED_ROUTES = ["/"];
+
+        var segments = window.location.pathname.split("/");
+        var hasPrefix = SUPPORTED.indexOf(segments[1]) !== -1;
+        var current = hasPrefix ? segments[1] : DEFAULT;
+
+        var basePath = hasPrefix ? "/" + segments.slice(2).join("/") : window.location.pathname;
+        if (basePath.length > 1 && basePath.charAt(basePath.length - 1) === "/") {
+          basePath = basePath.slice(0, -1);
+        }
+
+        // Sólo redirigimos donde existe traducción.
+        if (LOCALIZED_ROUTES.indexOf(basePath) === -1) return;
+
+        var stored = null;
+        try {
+          stored = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          /* modo privado o storage bloqueado: seguimos con la detección */
+        }
+
+        var wanted;
+        if (SUPPORTED.indexOf(stored) !== -1) {
+          wanted = stored;
+        } else {
+          var navigatorLang =
+            (window.navigator.languages && window.navigator.languages[0]) ||
+            window.navigator.language ||
+            DEFAULT;
+          wanted = navigatorLang.toLowerCase().split("-")[0];
+        }
+
+        if (SUPPORTED.indexOf(wanted) === -1) wanted = DEFAULT;
+        if (wanted === current) return;
+
+        var target = (wanted === DEFAULT ? "" : "/" + wanted) + basePath;
+        if (target === "") target = "/";
+        if (target === window.location.pathname) return;
+
+        window.location.replace(target + window.location.search + window.location.hash);
+      })();
+    </script>
 
     <!-- Primary Meta Tags -->
     <meta name="title" content={title} />
@@ -43,6 +130,12 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <meta property="og:image:height" content="800" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:site_name" content={title} />
+    <meta property="og:locale" content={lang} />
+    {
+      alternates
+        .filter(({ code }) => code !== lang)
+        .map(({ code }) => <meta property="og:locale:alternate" content={code} />)
+    }
 
     <!-- Fallbacks that some apps use -->
     <link rel="image_src" href={socialImageURL} />
@@ -72,6 +165,7 @@ const socialImageURL = new URL(image, Astro.site).toString();
     <Header />
     <slot />
     <Footer />
+    <ImageLightbox />
     <style is:global>
       :root {
         color-scheme: light dark;

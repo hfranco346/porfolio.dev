@@ -1,5 +1,4 @@
 ---
-import GitHub from "./icons/GitHub.astro";
 import Link from "./icons/Link.astro";
 import LinkButton from "./LinkButton.astro";
 import Nest from "./icons/Nest.astro";
@@ -8,6 +7,14 @@ import Angular from "./icons/Angular.astro";
 import Supabase from "./icons/Supabase.astro";
 import NodeJS from "./icons/Node.astro";
 import Apple from "./icons/apple.astro";
+import Swift from "./icons/Swift.astro";
+import Gemma from "./icons/Gemma.astro";
+import { content, type ProjectId } from "@/i18n/content";
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const texts = content[lang].projects;
 
 const TAGS = {
   FLUTTER: {
@@ -36,59 +43,106 @@ const TAGS = {
     icon: Nest,
   },
   APPLE: {
-    name: "iCloud Sync",
+    name: t("tag.icloudSync"),
     class: "bg-[#003159] text-white",
     icon: Apple,
   },
+  SWIFT: {
+    name: "Swift",
+    class: "bg-[#003159] text-white",
+    icon: Swift,
+  },
+  GEMMA: {
+    name: t("tag.localAi"),
+    class: "bg-[#003159] text-white",
+    icon: Gemma,
+  },
 };
-const PROJECTS = [
+
+// Datos que NO se traducen. El titulo y la descripcion se resuelven por `id`
+// desde el diccionario, para que no haya que duplicar imagen, link ni tags.
+const PROJECTS: {
+  id: ProjectId;
+  image: string;
+  link?: string;
+  tags: (typeof TAGS)[keyof typeof TAGS][];
+}[] = [
   {
-    title: "MealMixer - MealPlanning App powered by AI",
-    description:
-      "Meal planning app powered by AI. Built with Flutter, Supabase, and OpenAI. Users can create meal plans and shopping lists based on their preferences.",
-    link: "https://mealmixer-landing-astro.onrender.com/en/",
+    id: "mealmixer",
     image: "/projects/mealmixer.png",
+    link: "https://mealmixer-landing-astro.onrender.com/en/",
     tags: [TAGS.FLUTTER, TAGS.NODE, TAGS.NEST, TAGS.SUPABASE],
   },
   {
-    title:
-      "AI PR Reviewer - A developer tool to review pull requests with AI, based on prompt engineering",
-    description:
-      "A developer tool to review pull requests with AI, based on prompt engineering",
-
+    id: "aiPrReviewer",
     image: "/projects/aiprreviewer.png",
     tags: [TAGS.FLUTTER, TAGS.SUPABASE],
   },
   {
-    title: "ToDoodle - Handwritten style todo app",
-    description:
-      "A mobile APP to manage your tasks with a handwritten style. Built with Flutter, In App Purchases, and iCloud Sync.",
-
+    id: "todoodle",
     image: "/projects/todoodle.png",
     link: "https://apps.apple.com/hn/app/to-do-handwriting-style/id6747467870?l=en-GB",
     tags: [TAGS.FLUTTER, TAGS.APPLE],
+  },
+  {
+    id: "nearGps",
+    image: "/projects/near-gps.png",
+    link: "https://apps.apple.com/hn/app/near-gps/id6757407409?l=en-GB",
+    tags: [TAGS.FLUTTER],
+  },
+  {
+    id: "nearVgps",
+    image: "/projects/near-vgps.png",
+    link: "https://apps.apple.com/hn/app/near-vgps/id6760239357?l=en-GB",
+    tags: [TAGS.FLUTTER],
+  },
+  {
+    // Sin `link` a proposito: la ficha del App Store no se enlaza desde el
+    // portfolio. Sin link, el boton de preview no se renderiza.
+    id: "youfibre",
+    image: "/projects/youfibre.png",
+    tags: [TAGS.FLUTTER],
+  },
+  {
+    id: "typeIt",
+    image: "/projects/type-it.png",
+    link: "https://www.type-it.net/",
+    tags: [TAGS.FLUTTER, TAGS.SWIFT, TAGS.GEMMA],
   },
 ];
 ---
 
 <div class="flex flex-col gap-y-16">
   {
-    PROJECTS.map(({ image, title, description, tags, link }) => (
+    PROJECTS.map(({ id, image, tags, link }) => (
       <article class="flex flex-col space-x-0 space-y-8 group md:flex-row md:space-x-8 md:space-y-0">
         <div class="w-full md:w-1/2">
           <div class="relative flex flex-col items-center col-span-6 row-span-5 gap-8 transition duration-500 ease-in-out transform shadow-xl overflow-clip rounded-xl sm:rounded-xl md:group-hover:-translate-y-1 md:group-hover:shadow-2xl lg:border lg:border-gray-800 lg:hover:border-gray-700 lg:hover:bg-gray-800/50">
             <img
-              alt="Project Image"
+              alt={texts[id].title}
               class="object-cover object-top w-full h-56 transition duration-500 sm:h-full md:scale-110 md:group-hover:scale-105"
               loading="lazy"
               src={image}
+            />
+            {/*
+              Boton superpuesto en vez de envolver la <img>: no altera el
+              layout ni las animaciones de hover existentes, y a diferencia de
+              un onclick sobre la imagen es enfocable y anunciable por lectores
+              de pantalla.
+            */}
+            <button
+              type="button"
+              data-lightbox-src={image}
+              data-lightbox-alt={texts[id].title}
+              aria-label={`${t("lightbox.viewLarger")}: ${texts[id].title}`}
+              class="absolute inset-0 w-full h-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-yellow-500"
             />
           </div>
         </div>
 
         <div class="w-full md:w-1/2 md:max-w-lg">
           <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {title}
+            {texts[id].title}
           </h3>
           <div class="flex flex-wrap mt-2">
             <ul class="flex flex-row mb-2 gap-x-2">
@@ -105,13 +159,13 @@ const PROJECTS = [
             </ul>
 
             <div class="mt-2 text-gray-700 dark:text-gray-400">
-              {description}
+              {texts[id].description}
             </div>
             <footer class="flex items-end justify-start mt-4 gap-x-4">
               {link && (
                 <LinkButton href={link}>
                   <Link class="size-4" />
-                  Preview
+                  {t("project.preview")}
                 </LinkButton>
               )}
             </footer>

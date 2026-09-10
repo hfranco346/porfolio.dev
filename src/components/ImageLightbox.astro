@@ -1,0 +1,150 @@
+---
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<!--
+  `<dialog>` nativo en vez de un div a mano: el navegador ya aporta focus trap,
+  cierre con Escape, `inert` sobre el resto de la pagina y backdrop propio.
+  Se dispara desde cualquier elemento con `data-lightbox-src`.
+-->
+<dialog
+  id="image-lightbox"
+  aria-label={t("lightbox.label")}
+  class="p-0 bg-transparent border-none max-w-[95vw] max-h-[95vh] backdrop:bg-black/80 backdrop:backdrop-blur-sm"
+>
+  <div class="relative">
+    <img
+      id="image-lightbox-img"
+      src=""
+      alt=""
+      class="block max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+    />
+    <button
+      id="image-lightbox-close"
+      type="button"
+      aria-label={t("lightbox.close")}
+      class="absolute flex items-center justify-center transition rounded-full top-2 right-2 size-9 bg-black/60 text-white hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M18 6l-12 12"></path>
+        <path d="M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+</dialog>
+
+<style>
+  #image-lightbox[open] {
+    animation: lightbox-in 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  #image-lightbox[open]::backdrop {
+    animation: backdrop-in 0.15s ease-out both;
+  }
+
+  @keyframes lightbox-in {
+    from {
+      transform: scale(0.96);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes backdrop-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #image-lightbox[open],
+    #image-lightbox[open]::backdrop {
+      animation: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  // Delegacion sobre `document`, que ViewTransitions NO reemplaza: se registra
+  // una sola vez y siempre consulta el DOM vigente.
+  (function () {
+    if (window.__lightboxBound) return;
+    window.__lightboxBound = true;
+
+    var getDialog = function () {
+      return document.getElementById("image-lightbox");
+    };
+
+    document.addEventListener("click", function (event) {
+      var target = event.target instanceof Element ? event.target : null;
+      if (!target) return;
+
+      var dialog = getDialog();
+      if (!dialog) return;
+
+      var trigger = target.closest("[data-lightbox-src]");
+      if (trigger) {
+        var image = document.getElementById("image-lightbox-img");
+        if (!image) return;
+        image.src = trigger.dataset.lightboxSrc;
+        image.alt = trigger.dataset.lightboxAlt || "";
+        dialog.showModal();
+        // `showModal` bloquea la interaccion pero no el scroll de fondo.
+        document.documentElement.style.overflow = "hidden";
+        return;
+      }
+
+      if (target.closest("#image-lightbox-close")) {
+        dialog.close();
+        return;
+      }
+
+      // Al clickear el backdrop el target es el propio <dialog>.
+      if (target === dialog) dialog.close();
+    });
+
+    // `close` no burbujea: hay que escucharlo en fase de captura.
+    document.addEventListener(
+      "close",
+      function (event) {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.id !== "image-lightbox") return;
+
+        document.documentElement.style.overflow = "";
+
+        // Se suelta la imagen para no dejarla retenida en memoria.
+        var image = document.getElementById("image-lightbox-img");
+        if (image) {
+          image.removeAttribute("src");
+          image.alt = "";
+        }
+      },
+      true
+    );
+
+    // Si se navega con el modal abierto, el <dialog> se va con el swap y el
+    // overflow quedaria bloqueado para siempre.
+    document.addEventListener("astro:before-swap", function () {
+      document.documentElement.style.overflow = "";
+    });
+  })();
+</script>

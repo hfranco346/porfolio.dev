@@ -1,5 +1,9 @@
 ---
-const personalImageAlt = "Henderson Franco";
+import { content } from "@/i18n/content";
+import { getLangFromUrl } from "@/i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const { aboutMe } = content[lang];
 ---
 
 <article
@@ -8,84 +12,23 @@ const personalImageAlt = "Henderson Franco";
   <div
     class="[&>p]:mb-4 [&>p>strong]:text-yellow-500 dark:[&>p>strong]:text-yellow-100 [&>p>strong]:font-normal [&>p>strong]:font-mono text-pretty order-2 md:order-1"
   >
-    <p>
-      Hi, I’m Henderson Franco. I started my journey in software development
-      just before finishing university, and I’ve been passionate about building
-      great digital experiences ever since. Currently, I work with BairesDev, a
-      global outsourcing company that connects top-tier developers with clients
-      around the world. <strong
-        >Right now, I’m part of a UK-based project where I’m in charge of the
-        development of a customer-facing mobile app for broadband services,
-        helping users manage their accounts and services with ease.</strong
-      >.
-    </p>
-
-    <p>
-      Some of my success stories include <strong
-        >reducing payroll-related financial losses by over 25% through the
-        implementation of a facial recognition system that verified employee
-        attendance and proof of life.</strong
-      > This solution was deployed in a mobile application capable of working offline,
-      tailored for rural areas with limited internet access. Additionally, <strong
-        >I developed a new mobile application from scratch as an alternative to
-        the existing vehicle tracking app, which suffered from performance and
-        usability issues.</strong
-      > This initiative, which I undertook independently and outside of my regular
-      working hours, led to a 50% improvement in tracking accuracy and user satisfaction,
-      adding significant value to the company.
-    </p>
+    {
+      aboutMe.paragraphs.map((paragraph) => (
+        <p>
+          {paragraph.map((segment) =>
+            segment.strong ? <strong>{segment.text}</strong> : segment.text
+          )}
+        </p>
+      ))
+    }
   </div>
 
   <img
     width="200"
     height="200"
     src="/profile_picture.jpeg"
-    alt={personalImageAlt}
+    alt={aboutMe.profileAlt}
     class="order-1 object-cover w-64 h-full p-1 md:order-2 rotate-3 lg:p-2 lg:w-64 aspect-square rounded-2xl bg-black/20 dark:bg-yellow-500/5 ring-1 ring-black/70 dark:ring-white/20"
     style="object-position: 50% 50%"
   />
 </article>
-
-<!-- FRASES PROHIBIDAS EN VUESTRO PORTFOLIO
-
-<p>
-  Mi sueño es encontrar mi primer empleo en el mundo de la programación. Una empresa donde pueda seguir aprendiendo. ❌
-</p>
-
-<p>
-  ❌ Apasionado de la programación desde chekitito. Me encantan los ordenadores y crear páginas web buenas y rápidas con la última tecnología.
-</p>
-
-<p>
-  Trabajo bien en equipo. Siempre estoy aprendiendo cosas nuevas.
-</p>
-
--------------------------------------
-
---------------------------------------
-
-<p>
-  ¡Soy Leo! Estudié Derecho Empresarial y, tras años ejerciendo, me pasé al mundo de la Programación. Desde entonces disfruto creando experiencias web para los usuarios.
-</p>
-
-<p>
-  Entre mis éxitos destaco que durante el Grado Superior, ayudé a mis compañeros a aprender sobre TDD. Me encanta el testing, creo en su importancia, y me gusta compartir mi conocimiento sobre ello.
-</p>
-
-<p>
-  Cuento con experiencia desarrollando aplicaciones móviles, y he creado una iniciativa llamada X para mezclar mis dos pasiones: la programación y el derecho. Ayudando a la sociedad a acceso a una defensa justa.
-</p>
-
----------------------------------------
-
-<p>Me llamo Sara, tengo 25 años y soy de Santiago, Chile 🇨🇱. Terminé mis estudios como Desarrolladora Web. Me encanta enfocarme en la parte del rendimiento, para ofrecer la mejora experiencia al usuario.</p>
-
-<p>
-  Colaboro en la organización del MeetUp local BeerJS donde reunimos a desarrolladores de Santiago para compartir conocimiento y experiencias. El año 2023 hicimos un total de 25 charlas con más de 2000 asistentes.
-</p>
-
-<p>
-  Además de participar activamente en la comunidad, he participado en la Hackathon de Midudev quedando en 3er puesto con mi proyecto _Chatty_, donde usando IA podías interactuar con un PDF. ¡Échale un vistazo!
-</p>
-
--->
