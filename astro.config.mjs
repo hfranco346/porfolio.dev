@@ -6,7 +6,11 @@ import robotsTxt from "astro-robots-txt"
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind(), robotsTxt()],
-  site: 'https://porfolio.dev/',
+  // Dominio publico real del sitio. De aca salen las URLs absolutas de
+  // canonical, og:url, og:image, hreflang y robots.txt. Antes apuntaba a
+  // 'https://porfolio.dev/' (el template original de midudev), lo que rompia
+  // los previews al compartir y le cedia el canonical a un dominio ajeno.
+  site: 'https://porfolio-dev2.onrender.com/',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
